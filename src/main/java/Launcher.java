@@ -15,7 +15,8 @@ public class Launcher {
         RedisUtils.Init("localhost", 6379);
 
 //        popCandidate();
-        restoreCandidates();
+//        restoreCandidates();
+//        removeCandidate();
     }
 
     private static void popCandidate() {
@@ -76,7 +77,23 @@ public class Launcher {
 
             final Boolean result = RedisUtils.Execute(client -> client.sadd(key, params) == params.length);
 
-            log.info("Redis 操作结果：{}", result);
+            log.info("Redis Restore 操作结果：{}", result);
+        } catch (FileNotFoundException e) {
+            log.error("读取文件 {} 未找到：{}", path, e.getMessage());
+        } catch (IOException e) {
+            log.error("读取文件 {} IO 错误：{}", path, e.getMessage());
+        }
+    }
+
+    private static void removeCandidate() {
+        try {
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
+            final String content = reader.readLine();
+            final String[] params = content.split(",");
+
+            final Boolean result = RedisUtils.Execute(client -> client.srem(key, params) == params.length);
+
+            log.info("Redis Remove 操作结果：{}", result);
         } catch (FileNotFoundException e) {
             log.error("读取文件 {} 未找到：{}", path, e.getMessage());
         } catch (IOException e) {
